@@ -1,9 +1,10 @@
 import express, { json } from "express";
 import { z } from "zod";
+import {random} from "./utils";
 import jwt from "jsonwebtoken";
 import mongoose from 'mongoose';
-import {ContentModel, UserModel} from './db';
-
+import {ContentModel, UserModel,LinkModel} from './db';
+import cors from 'cors';
 const app = express();
 
 import * as dotenv from 'dotenv';
@@ -12,7 +13,7 @@ dotenv.config();
 
 let JWT_SECRET=process.env.JWT_SECRET||'';
 app.use(express.json());
-
+app.use(cors());
 app.get("/", (req, res) => {
     res.send("Hello World");
 });
@@ -85,10 +86,52 @@ app.delete("/api/v1/content", authMiddleware,async (req, res) => {
 
 app.post("/api/v1/content/search", (req, res) => {});
 
-app.post("/api/v1/shelf/share", (req, res) => {});
+app.post("/api/v1/shelf/share",authMiddleware, async (req, res) => {
+    const share=req.body.share;
+     // @ts-ignore
+     const userId=req.userId;
+    if(share){
+        const existinglink=await LinkModel.findOne({userId:userId});
+        if(existinglink){
+            res.json({
+                hash:existinglink.hash,
+            })
+            return;
+        }
+        const hash=random(10);
+        await LinkModel.create({hash:hash,userId:userId});
+        res.json({
+            hash:hash,
+        });
+    }
+    else{
+        await LinkModel.deleteOne({userId:userId});
+        res.json({message:"Link deleted"});
+    }
+});
 
 
-app.post("/api/v1/shelf:shareLink", (req, res) => {});
+app.post("/api/v1/shelf:shareLink", async(req, res) => {
+    const hash=req.params.shareLink;
+
+    const link=await LinkModel.findOne({hash:hash});
+    if(!link){
+        res.status(400).json({message:"Link not found"});
+        return;
+    }
+    const content=await ContentModel.find({userId:link.userId});
+    console.log(link);
+    const user=await UserModel.findOne({_id:link.userId});
+
+    if(!user){
+        res.status(400).json({message:"User not found"});
+        return;
+    }
+    res.json({content,username:user.username});
+
+
+
+});
 
 
 

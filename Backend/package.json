@@ -21,8 +21,10 @@
   },
   "homepage": "https://github.com/GarvitBanga/MindShelf#readme",
   "dependencies": {
+    "@types/cors": "^2.8.17",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",

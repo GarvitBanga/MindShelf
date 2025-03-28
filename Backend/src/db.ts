@@ -26,7 +26,12 @@ const ContentSchema=new Schema({
     createdAt:{type:Date,default:Date.now},
     updatedAt:{type:Date,default:Date.now},
 });
+const LinkSchema=new Schema({
+    hash:String,
+    userId:{type:mongoose.Types.ObjectId,ref:"User",required:true,unique:true}
+});
 export const ContentModel=model("Content",ContentSchema);
 export const UserModel= model("User",UserSchema);
+export const LinkModel=model("Link",LinkSchema);
 
     
